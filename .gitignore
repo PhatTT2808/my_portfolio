@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Environment secrets
+.env
+.env.local
+.env*.local
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+build/
+
+# Vercel
+.vercel
+
+# Editors / OS
+.DS_Store
+*.log
+.vscode/
