@@ -22,7 +22,7 @@ class Settings:
         o.strip()
         for o in os.getenv(
             "CORS_ORIGINS",
-            "http://localhost:3000,http://127.0.0.1:3000,https://tanphat-portfolio.vercel.app",
+            "http://localhost:3000,http://127.0.0.1:3000,https://tanphat.info.vn,https://tanphat-portfolio.vercel.app",
         ).split(",")
         if o.strip()
     ]
