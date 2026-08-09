@@ -100,14 +100,14 @@ Tạo **hai** project Vercel từ cùng một repo.
 
 | Env | Giá trị |
 |---|---|
-| `NEXT_PUBLIC_API_BASE_URL` | URL backend, vd `https://tanphat-api.vercel.app` |
+| `NEXT_PUBLIC_API_BASE_URL` | URL backend, vd `https://backend-lac-mu-44.vercel.app` |
 
 > Deploy backend trước để lấy URL, sau đó điền vào frontend. Nhớ cập nhật `CORS_ORIGINS`
 > của backend bằng URL frontend thật rồi redeploy.
 >
 > **Lưu ý:** Nếu gặp lỗi "Failed to fetch" khi thêm từ vựng / todo, kiểm tra:
 > 1. `NEXT_PUBLIC_API_BASE_URL` trong Vercel frontend phải trỏ đúng URL backend đã deploy.
-> 2. `CORS_ORIGINS` trong Vercel backend phải chứa URL frontend (vd `https://tanphat-portfolio.vercel.app`).
+> 2. `CORS_ORIGINS` trong Vercel backend phải chứa URL frontend thật.
 > 3. Redeploy cả hai sau khi sửa env.
 
 ---
