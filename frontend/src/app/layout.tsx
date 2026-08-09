@@ -26,6 +26,10 @@ export const metadata: Metadata = {
   title: "Tran Tan Phat — AI Engineer",
   description:
     "Third-year AI student at FPT University. Machine learning, deep learning and NLP projects, plus a private personal workspace.",
+  icons: {
+    icon: "/icon.png?v=2",
+    apple: "/icon.png?v=2",
+  },
 };
 
 export default function RootLayout({

@@ -7,7 +7,14 @@ import type { Priority, Task } from "@/lib/types";
 import { useLoad } from "@/lib/useLoad";
 
 
-const EMPTY = { title: "", due_date: "", priority: "medium" as Priority, notes: "" };
+const EMPTY = {
+  title: "",
+  due_date: "",
+  start_time: "",
+  end_time: "",
+  priority: "medium" as Priority,
+  notes: "",
+};
 
 const PRIORITY_STYLE: Record<Priority, string> = {
   low: "border-hairline text-muted",
@@ -41,6 +48,8 @@ export default function TasksPanel() {
         body: {
           title: form.title.trim(),
           due_date: form.due_date || null,
+          start_time: form.start_time || null,
+          end_time: form.end_time || null,
           priority: form.priority,
           notes: form.notes.trim() || null,
         },
@@ -100,6 +109,11 @@ export default function TasksPanel() {
               </span>
               {task.due_date && (
                 <span className="chip numeric">Due {task.due_date}</span>
+              )}
+              {task.start_time && task.end_time && (
+                <span className="chip numeric">
+                  {task.start_time.slice(0, 5)}–{task.end_time.slice(0, 5)}
+                </span>
               )}
             </div>
 
@@ -171,6 +185,35 @@ export default function TasksPanel() {
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
                 </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="t-start" className="field-label">
+                  Start time · optional
+                </label>
+                <input
+                  id="t-start"
+                  className="input"
+                  type="time"
+                  value={form.start_time}
+                  onChange={(e) =>
+                    setForm({ ...form, start_time: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <label htmlFor="t-end" className="field-label">
+                  End time · optional
+                </label>
+                <input
+                  id="t-end"
+                  className="input"
+                  type="time"
+                  value={form.end_time}
+                  onChange={(e) => setForm({ ...form, end_time: e.target.value })}
+                />
               </div>
             </div>
 

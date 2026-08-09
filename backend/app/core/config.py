@@ -16,9 +16,14 @@ class Settings:
     JWT_ALGORITHM: str = "HS256"
     JWT_TTL_HOURS: int = int(os.getenv("JWT_TTL_HOURS", "72"))
 
+    # Comma-separated list of allowed frontend origins.
+    # Add "*" to allow any origin (useful for local dev / personal deployment).
     CORS_ORIGINS: list[str] = [
         o.strip()
-        for o in os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+        for o in os.getenv(
+            "CORS_ORIGINS",
+            "http://localhost:3000,http://127.0.0.1:3000,https://tanphat-portfolio.vercel.app",
+        ).split(",")
         if o.strip()
     ]
 

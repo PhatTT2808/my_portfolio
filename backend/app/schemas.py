@@ -60,6 +60,8 @@ class TaskIn(BaseModel):
     title: str = Field(min_length=1, max_length=300)
     notes: str | None = Field(default=None, max_length=2000)
     due_date: date | None = None
+    start_time: str | None = None
+    end_time: str | None = None
     priority: Literal["low", "medium", "high"] = "medium"
 
 
@@ -67,6 +69,8 @@ class TaskUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=300)
     notes: str | None = Field(default=None, max_length=2000)
     due_date: date | None = None
+    start_time: str | None = None
+    end_time: str | None = None
     priority: Literal["low", "medium", "high"] | None = None
     done: bool | None = None
 
@@ -93,6 +97,7 @@ class ExpenseIn(BaseModel):
     title: str = Field(min_length=1, max_length=200)
     amount: float = Field(gt=0)
     category: str = Field(default="other", max_length=60)
+    type: Literal["expense", "income"] = "expense"
     spent_on: date
 
 
@@ -104,3 +109,13 @@ class ExpenseOut(ExpenseIn):
 class ExpenseSummary(BaseModel):
     total: float
     by_category: dict[str, float]
+
+
+class WalletOut(BaseModel):
+    id: str
+    initial_balance: float
+    updated_at: str
+
+
+class WalletUpdate(BaseModel):
+    initial_balance: float = Field(ge=0)

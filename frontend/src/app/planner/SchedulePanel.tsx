@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 
 import { api } from "@/lib/api";
-import type { ScheduleSlot } from "@/lib/types";
+import type { Priority, ScheduleSlot, Task } from "@/lib/types";
 import { useLoad } from "@/lib/useLoad";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -16,14 +16,37 @@ const EMPTY = {
   location: "",
 };
 
+const PRIORITY_STYLE: Record<Priority, string> = {
+  low: "border-hairline text-muted",
+  medium: "border-warning text-warning",
+  high: "border-m-red text-m-red",
+};
+
+/** Parse a `YYYY-MM-DD` date string as a local calendar date (no UTC shift). */
+function parseDateOnly(value: string): Date {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+/** Convert a local Date to the Monday-first weekday index used by the timetable. */
+function weekdayIndex(date: Date): number {
+  return (date.getDay() + 6) % 7;
+}
+
 export default function SchedulePanel() {
   const [slots, setSlots] = useState<ScheduleSlot[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
-      setSlots(await api<ScheduleSlot[]>("/schedule", { auth: true }));
+      const [schedule, taskList] = await Promise.all([
+        api<ScheduleSlot[]>("/schedule", { auth: true }),
+        api<Task[]>("/tasks", { auth: true }),
+      ]);
+      setSlots(schedule);
+      setTasks(taskList);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load timetable");
     }
@@ -175,6 +198,18 @@ export default function SchedulePanel() {
             const daySlots = slots
               .filter((slot) => slot.weekday === index)
               .sort((a, b) => a.start_time.localeCompare(b.start_time));
+            const dayTasks = tasks
+              .filter(
+                (task) =>
+                  task.due_date &&
+                  weekdayIndex(parseDateOnly(task.due_date)) === index,
+              )
+              .sort((a, b) =>
+                (a.start_time ?? "24:00").localeCompare(
+                  b.start_time ?? "24:00",
+                ),
+              );
+            const itemCount = daySlots.length + dayTasks.length;
             const isToday = index === todayIndex;
 
             return (
@@ -189,11 +224,11 @@ export default function SchedulePanel() {
                   {isToday ? (
                     <span className="chip border-ink text-ink">Today</span>
                   ) : (
-                    <span className="caption numeric">{daySlots.length}</span>
+                    <span className="caption numeric">{itemCount}</span>
                   )}
                 </div>
 
-                {daySlots.length === 0 ? (
+                {itemCount === 0 ? (
                   <p className="caption px-4 py-7 text-center">Free day</p>
                 ) : (
                   <ul className="divide-y divide-hairline-strong">
@@ -227,6 +262,47 @@ export default function SchedulePanel() {
                         </button>
                       </li>
                     ))}
+
+                    {dayTasks.length > 0 && (
+                      <li className="px-4 py-3">
+                        <p className="label-upper mb-2 text-muted">Todo</p>
+                        <ul className="flex flex-col gap-2">
+                          {dayTasks.map((task) => (
+                            <li
+                              key={task.id}
+                              className={`flex items-start gap-3 border-l-2 border-warning pl-3 ${
+                                task.done ? "opacity-55" : ""
+                              }`}
+                            >
+                              <div className="min-w-0">
+                                <p
+                                  className={`title-md truncate ${
+                                    task.done
+                                      ? "text-muted line-through"
+                                      : ""
+                                  }`}
+                                >
+                                  {task.title}
+                                </p>
+                                <div className="mt-1 flex flex-wrap items-center gap-2">
+                                  <span
+                                    className={`chip ${PRIORITY_STYLE[task.priority]}`}
+                                  >
+                                    {task.priority}
+                                  </span>
+                                  <span className="caption numeric">
+                                    Due {task.due_date}
+                                    {task.start_time &&
+                                      task.end_time &&
+                                      ` · ${task.start_time.slice(0, 5)}–${task.end_time.slice(0, 5)}`}
+                                  </span>
+                                </div>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </li>
+                    )}
                   </ul>
                 )}
               </div>

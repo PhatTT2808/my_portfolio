@@ -44,6 +44,8 @@ create table if not exists tasks (
   title text not null,
   notes text,
   due_date date,
+  start_time time,
+  end_time time,
   priority text not null default 'medium' check (priority in ('low','medium','high')),
   done boolean not null default false,
   created_at timestamptz not null default now()
@@ -63,8 +65,15 @@ create table if not exists expenses (
   title text not null,
   amount numeric(12,2) not null check (amount > 0),
   category text not null default 'other',
+  type text not null default 'expense' check (type in ('expense','income')),
   spent_on date not null default current_date,
   created_at timestamptz not null default now()
+);
+
+create table if not exists wallet (
+  id uuid primary key default gen_random_uuid(),
+  initial_balance numeric(12,2) not null default 0,
+  updated_at timestamptz not null default now()
 );
 
 create index if not exists vocabulary_word_idx on vocabulary (lower(word));
@@ -79,6 +88,7 @@ alter table vocabulary enable row level security;
 alter table tasks enable row level security;
 alter table schedule enable row level security;
 alter table expenses enable row level security;
+alter table wallet enable row level security;
 
 -- Seed your profile (edit the values).
 insert into profile (headline, subheadline, bio, spotify_embed_url)
@@ -88,3 +98,8 @@ select
   'Short bio here.',
   'https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M'
 where not exists (select 1 from profile);
+
+-- Seed a single wallet row (initial balance 0).
+insert into wallet (initial_balance)
+select 0
+where not exists (select 1 from wallet);

@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import date
+from datetime import date, datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -14,6 +14,8 @@ from app.schemas import (
     TaskIn,
     TaskOut,
     TaskUpdate,
+    WalletOut,
+    WalletUpdate,
 )
 
 router = APIRouter(tags=["planner"], dependencies=[Depends(require_owner)])
@@ -112,8 +114,37 @@ def expense_summary(start: date | None = None, end: date | None = None) -> Expen
     rows = list_expenses(start, end)
     by_category: dict[str, float] = defaultdict(float)
     for row in rows:
-        by_category[row.category] += row.amount
+        if row.type == "expense":
+            by_category[row.category] += row.amount
     return ExpenseSummary(
         total=round(sum(by_category.values()), 2),
         by_category={k: round(v, 2) for k, v in by_category.items()},
     )
+
+
+# ---------- wallet ----------
+@router.get("/wallet", response_model=WalletOut)
+def get_wallet() -> WalletOut:
+    res = get_client().table("wallet").select("*").limit(1).execute()
+    if not res.data:
+        raise HTTPException(status_code=404, detail="Wallet not found")
+    return WalletOut(**res.data[0])
+
+
+@router.patch("/wallet", response_model=WalletOut)
+def update_wallet(payload: WalletUpdate) -> WalletOut:
+    res = (
+        get_client()
+        .table("wallet")
+        .update(
+            {
+                "initial_balance": payload.initial_balance,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            }
+        )
+        .limit(1)
+        .execute()
+    )
+    if not res.data:
+        raise HTTPException(status_code=404, detail="Wallet not found")
+    return WalletOut(**res.data[0])

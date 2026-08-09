@@ -37,6 +37,8 @@ export type Task = {
   title: string;
   notes: string | null;
   due_date: string | null;
+  start_time: string | null;
+  end_time: string | null;
   priority: Priority;
   done: boolean;
   created_at: string;
@@ -56,6 +58,13 @@ export type Expense = {
   title: string;
   amount: number;
   category: string;
+  type: "expense" | "income";
   spent_on: string;
   created_at: string;
+};
+
+export type Wallet = {
+  id: string;
+  initial_balance: number;
+  updated_at: string;
 };

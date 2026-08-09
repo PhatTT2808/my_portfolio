@@ -46,13 +46,21 @@ export async function api<T>(
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_BASE}/api${path}`, {
-    method,
-    headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
-    cache,
-    next: revalidate === undefined ? undefined : { revalidate },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/api${path}`, {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      cache,
+      next: revalidate === undefined ? undefined : { revalidate },
+    });
+  } catch {
+    throw new ApiError(
+      `Cannot reach API at ${API_BASE}. Check that the backend is running and CORS is configured.`,
+      0,
+    );
+  }
 
   if (!res.ok) {
     if (res.status === 401 && auth && typeof window !== "undefined") {
